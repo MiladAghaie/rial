@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>تبدیل عدد به حروف فارسی</title>
+  <style>
+    body { font-family: Tahoma; direction: rtl; padding: 20px; }
+    input, button { padding: 10px; font-size: 16px; margin-top: 10px; }
+    .output { margin-top: 20px; font-size: 18px; }
+  </style>
+</head>
+<body>
+
+  <h2>تبدیل عدد به حروف فارسی (تومان / ریال)</h2>
+  <input type="number" id="numberInput" placeholder="عدد را وارد کنید" style="outline: none; border: none; background-color: rgb(231, 230, 230); border-radius: 10px;width: 80%;height: 40px;font-size: 40px;">
+  <button onclick="convertNumber()" style="width: 80px; border: none; border-radius: 10px; background-color: rgb(155, 155, 255); font-size: 20px;">تبدیل</button>
+
+  <div class="output" id="formatted"></div>
+  <div class="output" id="inWords"></div>
+
+  <script>
+    const yekan = ["", "یک", "دو", "سه", "چهار", "پنج", "شش", "هفت", "هشت", "نه"];
+    const dahgan = ["", "ده", "بیست", "سی", "چهل", "پنجاه", "شصت", "هفتاد", "هشتاد", "نود"];
+    const sadgan = ["", "صد", "دویست", "سیصد", "چهارصد", "پانصد", "ششصد", "هفتصد", "هشتصد", "نهصد"];
+    const special = ["ده", "یازده", "دوازده", "سیزده", "چهارده", "پانزده", "شانزده", "هفده", "هجده", "نوزده"];
+    const bigUnits = ["", "هزار", "میلیون", "میلیارد", "تریلیون"];
+
+    function threeDigitToWord(num) {
+      let str = "";
+      num = parseInt(num);
+      if (num === 0) return "";
+      let s = Math.floor(num / 100);
+      let d = Math.floor((num % 100) / 10);
+      let y = num % 10;
+
+      if (s) str += sadgan[s];
+      if (d > 1) {
+        if (str) str += " و ";
+        str += dahgan[d];
+        if (y) str += " و " + yekan[y];
+      } else if (d === 1) {
+        if (str) str += " و ";
+        str += special[y];
+      } else if (y) {
+        if (str) str += " و ";
+        str += yekan[y];
+      }
+      return str;
+    }
+
+    function numberToPersianWords(num) {
+      if (num === 0) return "صفر";
+      let parts = [];
+      let group = 0;
+
+      while (num > 0) {
+        let three = num % 1000;
+        if (three !== 0) {
+          let text = threeDigitToWord(three);
+          if (bigUnits[group]) text += " " + bigUnits[group];
+          parts.unshift(text);
+        }
+        num = Math.floor(num / 1000);
+        group++;
+      }
+
+      return parts.join(" و ");
+    }
+
+    function addCommas(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function convertNumber() {
+     let inputVal=document.getElementById("numberInput").value;
+     let input=parseInt(inputVal);
+     if (isNaN(input)) return;
+
+     let formattedInput=addCommas(input);
+     let toman=input;
+     let rial=input*10;
+
+     let tomanFormatted=addCommas(toman)
+     let rialFormatted=addCommas(rial)
+
+     let tomanText=numberToPersianWords(toman)+" تومان"
+     let rialText=numberToPersianWords(rial)+" ریال"
+
+     document.getElementById("formatted").innerHTML=`<h3>عدد وارد شده : ${formattedInput}</h3>`;
+     document.getElementById("inWords").innerHTML=`<mark>به تومان :${tomanFormatted}</mark> <br>
+     به حرف : ${tomanText} <br>
+     <br>
+     <mark style='background-color:lime'>به ریال :${rialFormatted}</mark> <br>
+     به حرف : ${rialText} `
+
+    }
+
+    document.getElementById("numberInput").addEventListener("keydown",(e)=>{
+      if (e.key==="Enter"){
+        convertNumber()
+      }
+    })
+  </script>
+</body>
+</html>
